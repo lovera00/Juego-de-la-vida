@@ -7,6 +7,20 @@
   </head>
   <body>
     <div id="container"></div>
+    <div id="buttons">
+      <button onclick="startGame()">Iniciar</button>
+      <button onclick="stopGame()">Detener</button>
+      <button onclick="clearGame()">Limpiar</button>
+      <select id="patterns" onchange="selectPattern()">
+        <option value="">Seleccione un patrón</option>
+        <option value="block">Bloque</option>
+        <option value="beehive">Panal</option>
+        <option value="blinker">Destellador</option>
+        <option value="toad">Sapo</option>
+        <option value="glider">Glider</option>
+        <option value="lwss">Sonda espacial ligera</option>
+      </select>
+    </div>
     <script src="script.js"></script>
   </body>
 </html>

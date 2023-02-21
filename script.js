@@ -19,46 +19,133 @@ function toggleCell() {
   this.style.backgroundColor = alive ? 'white' : 'black';
 }
 
-function nextGeneration() {
-  const newCells = [];
-  for (let i = 0; i < 30; i++) {
-    newCells[i] = [];
-    for (let j = 0; j < 50; j++) {
-      const cell = cells[i][j];
-      const isAlive = cell.dataset.alive === 'true';
-      const neighbors = countNeighbors(i, j);
-      let willLive = isAlive;
-      if (isAlive && (neighbors < 2 || neighbors > 3)) {
-        willLive = false;
-      } else if (!isAlive && neighbors === 3) {
-        willLive = true;
-      }
-      newCells[i][j] = willLive;
-    }
-  }
+function startGame() {
+  gameInterval = setInterval(nextGeneration, 500);
+}
+
+function stopGame() {
+  clearInterval(gameInterval);
+}
+
+function clearGame() {
+  stopGame();
   for (let i = 0; i < 30; i++) {
     for (let j = 0; j < 50; j++) {
-      const cell = cells[i][j];
-      const willLive = newCells[i][j];
-      cell.dataset.alive = willLive;
-      cell.style.backgroundColor = willLive ? 'black' : 'white';
+      cells[i][j].dataset.alive = false;
+      cells[i][j].style.backgroundColor = 'white';
     }
   }
 }
 
-function countNeighbors(i, j) {
-  let count = 0;
-  for (let x = i - 1; x <= i + 1; x++) {
-    for (let y = j - 1; y <= j + 1; y++) {
-      if (x >= 0 && x < 30 && y >= 0 && y < 50 && !(x === i && y === j)) {
-        const cell = cells[x][y];
-        if (cell.dataset.alive === 'true') {
-          count++;
+function selectPattern() {
+  const pattern = document.getElementById('patterns').value;
+  if (pattern === 'block') {
+    cells[5][5].dataset.alive = true;
+    cells[5][6].dataset.alive = true;
+    cells[6][5].dataset.alive = true;
+    cells[6][6].dataset.alive = true;
+  } else if (pattern === 'beehive') {
+    cells[6][5].dataset.alive = true;
+    cells[6][6].dataset.alive = true;
+    cells[7][4].dataset.alive = true;
+    cells[7][7].dataset.alive = true;
+    cells[8][5].dataset.alive = true;
+    cells[8][6].dataset.alive = true;
+  } else if (pattern === 'blinker') {
+    cells[5][6].dataset.alive = true;
+    cells[6][6].dataset.alive = true;
+    cells[7][6].dataset.alive = true;
+  } else if (pattern === 'toad') {
+    cells[5][6].dataset.alive = true;
+    cells[5][7].dataset.alive = true;
+    cells[5][8].dataset.alive = true;
+    cells[6][5].dataset.alive = true;
+    cells[6][6].dataset.alive = true;
+    cells[6][7].dataset.alive = true;
+  } else if (pattern === 'glider') {
+    cells[5][6].dataset.alive = true;
+    cells[6][7].dataset.alive = true;
+    cells[7][5].dataset.alive = true;
+    cells[7][6].dataset.alive = true;
+    cells[7][7].dataset.alive = true;
+  } else if (pattern === 'lwss') {
+    cells[5][6].dataset.alive = true;
+    cells[5][7].dataset.alive = true;
+    cells[5][8].dataset.alive = true;
+    cells[5][9].dataset.alive = true;
+    cells[6][5].dataset.alive = true;
+    cells[6][9].dataset.alive = true;
+    cells[7][9].dataset.alive = true;
+    cells[8][6].dataset.alive = true;
+    cells[8][8].dataset.alive = true;
+    cells[8][9].dataset.alive = true;
+} else if (pattern === 'rpentomino') {
+    cells[5][6].dataset.alive = true;
+    cells[5][7].dataset.alive = true;
+    cells[6][5].dataset.alive = true;
+    cells[6][6].dataset.alive = true;
+    cells[7][6].dataset.alive = true;
+  }
+  // Si se ha seleccionado un patrón, actualizamos el estilo de las celdas correspondientes.
+  if (pattern !== '') {
+    for (let i = 0; i < 30; i++) {
+      for (let j = 0; j < 50; j++) {
+        const cell = cells[i][j];
+        const alive = cell.dataset.alive === 'true';
+        if (alive) {
+          cell.style.backgroundColor = 'black';
+        } else {
+          cell.style.backgroundColor = 'white';
         }
+      }
+    }
+  }
+}
+
+function nextGeneration() {
+  const nextGen = [];
+  for (let i = 0; i < 30; i++) {
+    nextGen[i] = [];
+    for (let j = 0; j < 50; j++) {
+      const neighbors = getNeighbors(i, j);
+      const alive = cells[i][j].dataset.alive === 'true';
+      if (alive && (neighbors < 2 || neighbors > 3)) {
+        nextGen[i][j] = false;
+      } else if (!alive && neighbors === 3) {
+        nextGen[i][j] = true;
+      } else {
+        nextGen[i][j] = alive;
+      }
+    }
+  }
+  for (let i = 0; i < 30; i++) {
+    for (let j = 0; j < 50; j++) {
+      const cell = cells[i][j];
+      cell.dataset.alive = nextGen[i][j];
+      const alive = cell.dataset.alive === 'true';
+      cell.style.backgroundColor = alive ? 'black' : 'white';
+    }
+  }
+}
+
+function getNeighbors(x, y) {
+  let count = 0;
+  for (let i = -1; i <= 1; i++) {
+    for (let j = -1; j <= 1; j++) {
+      if (i === 0 && j === 0) {
+        continue;
+      }
+      const neighborX = x + i;
+      const neighborY = y + j;
+      if (neighborX < 0 || neighborX >= 30 || neighborY < 0 || neighborY >= 50) {
+        continue;
+      }
+      const neighbor = cells[neighborX][neighborY];
+      if (neighbor.dataset.alive === 'true') {
+        count++;
       }
     }
   }
   return count;
 }
 
-setInterval(nextGeneration, 1000);
